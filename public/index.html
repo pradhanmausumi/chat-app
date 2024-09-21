@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <style>
+        /* Basic styling */
+        #messages p {
+            color: rgb(101, 38, 110);
+            margin: 0;
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
+        }
+        /* Styling for better layout */
+        #container {
+            width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #message, #username {
+            width: calc(100% - 22px); /* Adjust width for padding and border */
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        #sendBtn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background-color: #6c5b7b;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #sendBtn:hover {
+            background-color: #9a8c98;
+        }
+        #messages {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        h1{
+            color: #1f061c;
+            text-align: center;
+            
+        }
+        h1:hover{
+            color: #d37ede;
+        }
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <h1>Chat App</h1>
+    <input type="text" id="username" placeholder="Enter your username"/>
+    <input type="text" id="message" placeholder="Enter Message"/>
+    <button id="sendBtn">Send</button>
+    <div id="messages"></div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>  <!-- Socket.IO client script -->
+
+<script>
+    const socket = io(); // Connect to the Socket.IO server
+    const sendBtn = document.getElementById("sendBtn");
+    const messageInput = document.getElementById("message");
+    const usernameInput = document.getElementById("username");//refer
+    const allMessage = document.getElementById("messages");
+
+    // Send message when button is clicked
+    sendBtn.addEventListener('click', () => {
+        const message = messageInput.value.trim();
+        const username = usernameInput.value.trim() || "Anonymous"; // Default username if not provided
+        if (message !== '') {
+            socket.emit('user-message', { username, message });
+            messageInput.value = ''; // Clear the input field
+        }
+    });
+
+    // Handle incoming messages from the server
+    socket.on("message", (data) => {
+        const p = document.createElement('p');
+        p.innerText = `${data.username} [${data.timestamp}]: ${data.message}`;
+        allMessage.appendChild(p);
+        allMessage.scrollTop = allMessage.scrollHeight; // allMessage.scrollTop = allMessage.scrollHeight;: 
+        //This ensures that the chat window scrolls to the bottom so that the latest message is visible.
+
+
+    });
+
+    // Allow sending messages with Enter key
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendBtn.click(); // Trigger the click event on the send button
+        }
+    });
+</script>
+
+</body>
+</html>
